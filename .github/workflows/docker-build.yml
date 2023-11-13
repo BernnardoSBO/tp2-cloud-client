@@ -1,0 +1,27 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Login Docker
+      run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+    
+    - name: Build and Push the Docker image
+      run: |
+        newversion=$(date +%s)
+        docker build ./front-end --file ./front-end/Dockerfile --tag bernnardosbo/nginx-frontend:$newversion
+        docker push bernnardosbo/nginx-frontend:$newversion
+      
