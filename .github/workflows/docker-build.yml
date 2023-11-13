@@ -21,7 +21,33 @@ jobs:
     
     - name: Build and Push the Docker image
       run: |
-        newversion=$(date +%s)
-        docker build . --file Dockerfile --tag bernnardosbo/nginx-frontend:$newversion
-        docker push bernnardosbo/nginx-frontend:$newversion
-      
+        docker build . --file Dockerfile --tag bernnardosbo/nginx-frontend:ga-${{ github.run_number }}
+        docker push bernnardosbo/nginx-frontend:ga-${{ github.run_number }}
+        
+  updateYaml:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      name: changing manifests of k8s
+      with:
+        repository: 'BernnardoSBO/tp2-cloud-manifests'
+        token: ${{ secrets.GIT_PASSWORD }}
+        
+    - name: Change k8s manifest so ArgoCD can push new images
+      run: |
+        git config user.email GIT@ACTIONS.COM
+        git config user.name new_yaml_modification
+        pwd
+        cat config.yaml
+        pwd
+        sed -i "s+bernnardosbo/nginx-frontend.*+bernnardosbo/nginx-frontend:ga-$RUN_NUMBER+g" config.yaml
+        cat config.yaml
+        git add .
+        git commit -m 'GithubActions: changed manifest (id: $RUN_NUMBER)'
+        git push origin master
+      env:
+        GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+        GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}
+        RUN_NUMBER: ${{ github.run_number }}
+    
