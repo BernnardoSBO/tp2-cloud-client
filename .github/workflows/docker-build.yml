@@ -21,7 +21,7 @@ jobs:
     
     - name: Build and Push the Docker image
       run: |
-        new-version=$(date +%s)
-        docker build ./front-end --file Dockerfile --tag bernnardosbo/nginx-frontend:$new-version
-        docker push bernnardosbo/nginx-frontend:$new-version
+        newversion=$(date +%s)
+        docker build ./front-end --file Dockerfile --tag bernnardosbo/nginx-frontend:$newversion
+        docker push bernnardosbo/nginx-frontend:$newversion
       
